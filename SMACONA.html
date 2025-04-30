@@ -1,0 +1,259 @@
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script><!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HARLEX GAMING SCHOOL</title>
+  <script src="https://cdn.jsdelivr.net/npm/react@18.2.0/umd/react.production.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/react-dom@18.2.0/umd/react-dom.production.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/babel-standalone@6.26.0/babel.min.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body>
+  <div id="root"></div>
+  <script type="text/babel">
+    const { useState } = React;
+
+    // Navbar Component
+    const Navbar = () => {
+      const [isOpen, setIsOpen] = useState(false);
+      return (
+        <nav className="bg-blue-900 text-white fixed w-full z-10">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex justify-between h-16">
+              <div className="flex">
+                <div className="flex-shrink-0 flex items-center">
+                  <img className="h-8 w-8" src="https://via.placeholder.com/32" alt="Logo" />
+                  <span className="ml-2 text-xl font-bold">St. Mark's College</span>
+                </div>
+              </div>
+              <div className="hidden sm:ml-6 sm:flex sm:items-center">
+                <a href="#home" className="px-3 py-2 rounded-md text-sm font-medium hover:bg-blue-700">Home</a>
+                <a href="#about" className="px-3 py-2 rounded-md text-sm font-medium hover:bg-blue-700">About</a>
+                <a href="#academics" className="px-3 py-2 rounded-md text-sm font-medium hover:bg-blue-700">Academics</a>
+                <a href="#admissions" className="px-3 py-2 rounded-md text-sm font-medium hover:bg-blue-700">Admissions</a>
+                <a href="#activities" className="px-3 py-2 rounded-md text-sm font-medium hover:bg-blue-700">Activities</a>
+                <a href="#contact" className="px-3 py-2 rounded-md text-sm font-medium hover:bg-blue-700">Contact</a>
+              </div>
+              <div className="-mr-2 flex items-center sm:hidden">
+                <button onClick={() => setIsOpen(!isOpen)} className="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-white hover:bg-blue-700 focus:outline-none">
+                  <svg className={`${isOpen ? 'hidden' : 'block'} h-6 w-6`} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
+                  </svg>
+                  <svg className={`${isOpen ? 'block' : 'hidden'} h-6 w-6`} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </div>
+          <div className={`${isOpen ? 'block' : 'hidden'} sm:hidden`}>
+            <div className="pt-2 pb-3 space-y-1">
+              <a href="#home" className="block px-3 py-2 rounded-md text-base font-medium hover:bg-blue-700">Home</a>
+              <a href="#about" className="block px-3 py-2 rounded-md text-base font-medium hover:bg-blue-700">About</a>
+              <a href="#academics" className="block px-3 py-2 rounded-md text-base font-medium hover:bg-blue-700">Academics</a>
+              <a href="#admissions" className="block px-3 py-2 rounded-md text-base font-medium hover:bg-blue-700">Admissions</a>
+              <a href="#activities" className="block px-3 py-2 rounded-md text-base font-medium hover:bg-blue-700">Activities</a>
+              <a href="#contact" className="block px-3 py-2 rounded-md text-base font-medium hover:bg-blue-700">Contact</a>
+            </div>
+          </div>
+        </nav>
+      );
+    };
+
+    // Hero Section
+    const Hero = () => (
+      <section id="home" className="bg-blue-900 text-white pt-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 text-center">
+          <h1 className="text-4xl md:text-5xl font-bold mb-4">Welcome to St. Mark's College Namagoma</h1>
+          <p className="text-lg md:text-xl mb-6">“To Be Not To Seem” – Nurturing Leaders with Excellence and Christian Values</p>
+          <a href="#about" className="inline-block bg-yellow-500 text-blue-900 px-6 py-3 rounded-md font-semibold hover:bg-yellow-400">Learn More</a>
+        </div>
+      </section>
+    );
+
+    // About Section
+    const About = () => (
+      <section id="about" className="py-16 bg-gray-100">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <h2 className="text-3xl font-bold text-blue-900 mb-8 text-center">About Us</h2>
+          <div className="grid md:grid-cols-2 gap-8">
+            <div>
+              <p className="text-gray-700 mb-4">
+                St. Mark’s College Namagoma is a premier secondary school in Uganda, committed to providing top-quality education. Located along Masaka Road, we are a private, mixed, day and boarding school offering O and A-level programs. Our mission is to nurture students with a zest for life, a spirit of enterprise, community service, and leadership.[](https://ayoma.co.ug/listing/st-marks-college-namagoma/)
+              </p>
+              <p className="text-gray-700">
+                Guided by our motto, “To Be Not To Seem,” and core values of Godliness, Reliability, Excellence, Ethics, and Teamwork (GREET), we foster a holistic education that prepares students for a dynamic world.[](https://businessdirectory.co.ug/listing/st-marks-college-namagoma/)
+              </p>
+            </div>
+            <div className="flex justify-center">
+              <img src="https://via.placeholder.com/400" alt="Campus" className="rounded-lg shadow-lg" />
+            </div>
+          </div>
+        </div>
+      </section>
+    );
+
+    // Academics Section
+    const Academics = () => (
+      <section id="academics" className="py-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <h2 className="text-3xl font-bold text-blue-900 mb-8 text-center">Academics</h2>
+          <p className="text-gray-700 mb-6 text-center">
+            Our academic programs are designed to build well-rounded individuals. We offer a balanced curriculum for O and A-level students, supported by well-stocked laboratories and a library.[](https://schoolnet.africa/UG/lower/st-marks-college-namagoma/)
+          </p>
+          <div className="grid md:grid-cols-3 gap-6">
+            <div className="bg-white p-6 rounded-lg shadow-md">
+              <h3 className="text-xl font-semibold text-blue-900 mb-2">O-Level Program</h3>
+              <p className="text-gray-600">Comprehensive subjects preparing students for national examinations with a focus on academic excellence.</p>
+            </div>
+            <div className="bg-white p-6 rounded-lg shadow-md">
+              <h3 className="text-xl font-semibold text-blue-900 mb-2">A-Level Program</h3>
+              <p className="text-gray-600">Advanced studies in sciences, arts, and humanities, equipping students for higher education.</p>
+            </div>
+            <div className="bg-white p-6 rounded-lg shadow-md">
+              <h3 className="text-xl font-semibold text-blue-900 mb-2">Mentorship</h3>
+              <p className="text-gray-600">Personalized guidance to help students become the best versions of themselves in their chosen fields.[](https://stmark.sc.ug/)
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+    );
+
+    // Admissions Section
+    const Admissions = () => (
+      <section id="admissions" className="py-16 bg-gray-100">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <h2 className="text-3xl font-bold text-blue-900 mb-8 text-center">Admissions</h2>
+          <p className="text-gray-700 mb-6 text-center">
+            Join our vibrant community! Admission requires a first-grade pass in PLE for O-level or UCE for A-level. Others may apply but must attend an interview.[](https://schoolnet.africa/UG/lower/st-marks-college-namagoma/)
+          </p>
+          <div className="text-center">
+            <p className="text-gray-700 mb-4">Apply through your previous school or download our application form from the official website.</p>
+            <a href="https://stmark.sc.ug/admission" className="inline-block bg-blue-900 text-white px-6 py-3 rounded-md font-semibold hover:bg-blue-800">Apply Now</a>
+          </div>
+        </div>
+      </section>
+    );
+
+    // Activities Section
+    const Activities = () => (
+      <section id="activities" className="py-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <h2 className="text-3xl font-bold text-blue-900 mb-8 text-center">Co-Curricular Activities</h2>
+          <p className="text-gray-700 mb-6 text-center">
+            We nurture talents through diverse activities, including sports, clubs, and inspirational nights to empower students.[](https://www.schoolandcollegelistings.com/UG/Kampala/487391851279521/St.-Mark%27s-College-Namagoma)
+          </p>
+          <div className="grid md:grid-cols-3 gap-6">
+            <div className="bg-white p-6 rounded-lg shadow-md">
+              <h3 className="text-xl font-semibold text-blue-900 mb-2">Gavel Club</h3>
+              <p className="text-gray-600">Enhancing public speaking skills through Toastmasters International’s program.[](https://www.schoolandcollegelistings.com/UG/Kampala/487391851279521/St.-Mark%27s-College-Namagoma)
+              </p>
+            </div>
+            <div className="bg-white p-6 rounded-lg shadow-md">
+              <h3 className="text-xl font-semibold text-blue-900 mb-2">Worship Extension</h3>
+              <p className="text-gray-600">A moment of prayer and worship to strengthen spiritual growth.[](https://www.schoolandcollegelistings.com/UG/Kampala/487391851279521/St.-Mark%27s-College-Namagoma)
+              </p>
+            </div>
+            <div className="bg-white p-6 rounded-lg shadow-md">
+              <h3 className="text-xl font-semibold text-blue-900 mb-2">Sports & Clubs</h3>
+              <p className="text-gray-600">Opportunities to develop social skills and teamwork through various activities.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+    );
+
+    // Contact Section
+    const Contact = () => (
+      <section id="contact" className="py-16 bg-blue-900 text-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <h2 className="text-3xl font-bold mb-8 text-center">Contact Us</h2>
+          <div className="grid md:grid-cols-2 gap-8">
+            <div>
+              <p className="mb-4">St. Mark’s College Namagoma</p>
+              <p className="mb-4">P.O. Box 22888, Kampala, Uganda</p>
+              <p className="mb-4">Phone: +256-393-103418 / +256-775-831844</p>
+              <p className="mb-4">Email: info@stmark.sc.ug</p>
+              <p>Location: Namagoma, Off Masaka Road, Kampala</p>
+            </div>
+            <div className="flex justify-center">
+              <img src="https://via.placeholder.com/400" alt="Map" className="rounded-lg shadow-lg" />
+            </div>
+          </div>
+        </div>
+      </section>
+    );
+
+    // Footer Component
+    const Footer = () => (
+      <footer className="bg-gray-800 text-white py-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <p>&copy; 2025 St. Mark’s College Namagoma. All rights reserved.</p>
+          <div className="mt-4 flex justify-center space-x-4">
+            <a href="https://facebook.com" className="hover:text-yellow-500">Facebook</a>
+            <a href="https://twitter.com" className="hover:text-yellow-500">Twitter</a>
+          </div>
+        </div>
+      </footer>
+    );
+
+    // Main App Component
+    const App = () => (
+      <div>
+        <Navbar />
+        <Hero />
+        <About />
+        <Academics />
+        <Admissions />
+        <Activities />
+        <Contact />
+        <Footer />
+      </div>
+    );
+
+    // Render the App
+    ReactDOM.render(<App />, document.getElementById('root'));
+  </script>
+</body>
+</html>
